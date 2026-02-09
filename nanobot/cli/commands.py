@@ -721,6 +721,7 @@ def cron_add(
     every: int = typer.Option(None, "--every", "-e", help="Run every N seconds"),
     cron_expr: str = typer.Option(None, "--cron", "-c", help="Cron expression (e.g. '0 9 * * *')"),
     at: str = typer.Option(None, "--at", help="Run once at time (ISO format)"),
+    timezone: str = typer.Option(None, "--timezone", "--tz", help="Timezone (e.g. 'Asia/Ho_Chi_Minh', 'America/New_York'). Defaults to local timezone."),
     deliver: bool = typer.Option(False, "--deliver", "-d", help="Deliver response to channel"),
     to: str = typer.Option(None, "--to", help="Recipient for delivery"),
     channel: str = typer.Option(None, "--channel", help="Channel for delivery (e.g. 'telegram', 'whatsapp')"),
@@ -729,12 +730,12 @@ def cron_add(
     from nanobot.config.loader import get_data_dir
     from nanobot.cron.service import CronService
     from nanobot.cron.types import CronSchedule
-    
+
     # Determine schedule type
     if every:
         schedule = CronSchedule(kind="every", every_ms=every * 1000)
     elif cron_expr:
-        schedule = CronSchedule(kind="cron", expr=cron_expr)
+        schedule = CronSchedule(kind="cron", expr=cron_expr, tz=timezone)
     elif at:
         import datetime
         dt = datetime.datetime.fromisoformat(at)

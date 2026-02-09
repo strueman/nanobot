@@ -50,6 +50,10 @@ class CronTool(Tool):
                     "type": "string",
                     "description": "Cron expression like '0 9 * * *' (for scheduled tasks)"
                 },
+                "timezone": {
+                    "type": "string",
+                    "description": "Timezone for cron expression (e.g. 'Asia/Bangkok', 'America/New_York'). Defaults to local timezone if not specified."
+                },
                 "job_id": {
                     "type": "string",
                     "description": "Job ID (for remove)"
@@ -64,18 +68,19 @@ class CronTool(Tool):
         message: str = "",
         every_seconds: int | None = None,
         cron_expr: str | None = None,
+        timezone: str | None = None,
         job_id: str | None = None,
         **kwargs: Any
     ) -> str:
         if action == "add":
-            return self._add_job(message, every_seconds, cron_expr)
+            return self._add_job(message, every_seconds, cron_expr, timezone)
         elif action == "list":
             return self._list_jobs()
         elif action == "remove":
             return self._remove_job(job_id)
         return f"Unknown action: {action}"
-    
-    def _add_job(self, message: str, every_seconds: int | None, cron_expr: str | None) -> str:
+
+    def _add_job(self, message: str, every_seconds: int | None, cron_expr: str | None, timezone: str | None) -> str:
         if not message:
             return "Error: message is required for add"
         if not self._channel or not self._chat_id:
@@ -85,7 +90,7 @@ class CronTool(Tool):
         if every_seconds:
             schedule = CronSchedule(kind="every", every_ms=every_seconds * 1000)
         elif cron_expr:
-            schedule = CronSchedule(kind="cron", expr=cron_expr)
+            schedule = CronSchedule(kind="cron", expr=cron_expr, tz=timezone)
         else:
             return "Error: either every_seconds or cron_expr is required"
         

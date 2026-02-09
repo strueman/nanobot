@@ -1,11 +1,13 @@
 """Cron service for scheduling agent tasks."""
 
 import asyncio
+import datetime
 import json
 import time
 import uuid
 from pathlib import Path
 from typing import Any, Callable, Coroutine
+from zoneinfo import ZoneInfo
 
 from loguru import logger
 
@@ -30,9 +32,16 @@ def _compute_next_run(schedule: CronSchedule, now_ms: int) -> int | None:
     if schedule.kind == "cron" and schedule.expr:
         try:
             from croniter import croniter
-            cron = croniter(schedule.expr, time.time())
-            next_time = cron.get_next()
-            return int(next_time * 1000)
+            # Use timezone-aware datetime if tz is specified
+            if schedule.tz:
+                base_time = datetime.datetime.now(ZoneInfo(schedule.tz))
+            else:
+                # Default to local timezone
+                base_time = datetime.datetime.now().astimezone()
+
+            cron = croniter(schedule.expr, base_time)
+            next_time = cron.get_next(datetime.datetime)
+            return int(next_time.timestamp() * 1000)
         except Exception:
             return None
     
