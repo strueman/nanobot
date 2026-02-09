@@ -94,7 +94,7 @@ pip install nanobot-ai
 
 > [!TIP]
 > Set your API key in `~/.nanobot/config.json`.
-> Get API keys: [OpenRouter](https://openrouter.ai/keys) (Global) · [DashScope](https://dashscope.console.aliyun.com) (Qwen) · [Brave Search](https://brave.com/search/api/) (optional, for web search)
+> Get API keys: [OpenRouter](https://openrouter.ai/keys) (Global) · [DashScope](https://dashscope.console.aliyun.com) (Qwen) · [Brave Search](https://brave.com/search/api/) or [Tavily](https://tavily.com/) (optional, for web search)
 
 **1. Initialize**
 
@@ -115,6 +115,60 @@ For OpenRouter - recommended for global users:
   "agents": {
     "defaults": {
       "model": "anthropic/claude-opus-4-5"
+    }
+  }
+}
+```
+
+**Optional: Web search provider** (default is `brave`)
+
+Config keys:
+- `tools.web.search.provider`: `brave` (default), `duckduckgo`, or `tavily`
+- `tools.web.search.apiKey` (or `BRAVE_API_KEY`)
+- `tools.web.search.tavilyApiKey` (or `TAVILY_API_KEY`)
+- `tools.web.search.fallbackToDuckduckgoOnMissingKey` (default: `true`)
+
+Use DuckDuckGo (no API key required):
+
+```json
+{
+  "tools": {
+    "web": {
+      "search": {
+        "provider": "duckduckgo",
+        "maxResults": 5
+      }
+    }
+  }
+}
+```
+
+Use Tavily:
+
+```json
+{
+  "tools": {
+    "web": {
+      "search": {
+        "provider": "tavily",
+        "tavilyApiKey": "tvly-...",
+        "maxResults": 5
+      }
+    }
+  }
+}
+```
+
+Disable automatic DuckDuckGo fallback on missing keys:
+
+```json
+{
+  "tools": {
+    "web": {
+      "search": {
+        "provider": "brave",
+        "fallbackToDuckduckgoOnMissingKey": false
+      }
     }
   }
 }

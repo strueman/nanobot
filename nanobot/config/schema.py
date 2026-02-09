@@ -1,6 +1,7 @@
 """Configuration schema using Pydantic."""
 
 from pathlib import Path
+from typing import Literal
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings
 
@@ -161,7 +162,10 @@ class GatewayConfig(BaseModel):
 
 class WebSearchConfig(BaseModel):
     """Web search tool configuration."""
+    provider: Literal["brave", "duckduckgo", "tavily"] = "brave"
     api_key: str = ""  # Brave Search API key
+    tavily_api_key: str = ""  # Tavily API key
+    fallback_to_duckduckgo_on_missing_key: bool = True
     max_results: int = 5
 
 
