@@ -52,9 +52,9 @@ class WebSearchTool(Tool):
         "type": "object",
         "properties": {
             "query": {"type": "string", "description": "Search query"},
-            "count": {"type": "integer", "description": "Results (1-10)", "minimum": 1, "maximum": 10},
+            "count": {"type": "integer", "description": "Results (1-10)", "minimum": 1, "maximum": 10}
         },
-        "required": ["query"],
+        "required": ["query"]
     }
 
     def __init__(
