@@ -4,6 +4,7 @@ import html
 import json
 import os
 import re
+from collections.abc import Awaitable, Callable
 from typing import Any
 from urllib.parse import urlparse
 
@@ -72,28 +73,31 @@ class WebSearchTool(Tool):
         if max_results != 5:
             self.config.max_results = max_results
         self._transport = transport
+        self._provider_searchers: dict[str, Callable[[str, int], Awaitable[str]]] = {
+            "duckduckgo": self._search_duckduckgo,
+            "tavily": self._execute_tavily_provider,
+            "searxng": self._search_searxng,
+            "brave": self._execute_brave_provider,
+        }
 
     async def execute(self, query: str, count: int | None = None, **kwargs: Any) -> str:
         provider = (self.config.provider or "brave").strip().lower()
         n = min(max(count or self.config.max_results, 1), 10)
 
-        if provider == "duckduckgo":
-            return await self._search_duckduckgo(query=query, n=n)
+        search = self._provider_searchers.get(provider, self._provider_searchers["brave"])
+        return await search(query, n)
 
-        if provider == "tavily":
-            tavily_key = self._tavily_api_key()
-            if not tavily_key and self.config.fallback_to_duckduckgo_on_missing_key:
-                return await self._fallback_to_duckduckgo('TAVILY_API_KEY', query, n)
-            return await self._search_tavily(query=query, n=n)
-
-        if provider == "searxng":
-            return await self._search_searxng(query=query, n=n)
-
+    async def _execute_brave_provider(self, query: str, n: int) -> str:
         brave_key = self._brave_api_key()
         if not brave_key and self.config.fallback_to_duckduckgo_on_missing_key:
             return await self._fallback_to_duckduckgo('BRAVE_API_KEY', query, n)
-
         return await self._search_brave(query=query, n=n)
+
+    async def _execute_tavily_provider(self, query: str, n: int) -> str:
+        tavily_key = self._tavily_api_key()
+        if not tavily_key and self.config.fallback_to_duckduckgo_on_missing_key:
+            return await self._fallback_to_duckduckgo('TAVILY_API_KEY', query, n)
+        return await self._search_tavily(query=query, n=n)
 
     async def _fallback_to_duckduckgo(self, missing_key: str, query: str, n: int) -> str:
         ddg = await self._search_duckduckgo(query=query, n=n)

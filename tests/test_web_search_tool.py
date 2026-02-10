@@ -1,6 +1,7 @@
 import httpx
 import pytest
 from collections.abc import Callable
+from typing import Literal
 
 from nanobot.agent.tools.web import WebSearchTool
 from nanobot.config.schema import WebSearchConfig
@@ -98,7 +99,7 @@ def _assert_tavily_request(request: httpx.Request) -> bool:
     ],
 )
 async def test_web_search_provider_formats_results(
-    provider: str,
+    provider: Literal["brave", "tavily", "searxng"],
     config_kwargs: dict,
     query: str,
     count: int,
@@ -233,3 +234,18 @@ async def test_web_search_searxng_uses_env_base_url(
         handler,
     ).execute(query="nanobot", count=1)
     assert "1. env result" in result
+
+
+@pytest.mark.asyncio
+async def test_web_search_provider_dispatch_map_can_be_extended() -> None:
+    config = WebSearchConfig(provider="brave", max_results=5)
+    config.provider = "custom"  # type: ignore[assignment]
+    tool = WebSearchTool(config=config)
+
+    async def _custom_provider(query: str, n: int) -> str:
+        return f"custom:{query}:{n}"
+
+    tool._provider_searchers["custom"] = _custom_provider  # type: ignore[attr-defined]
+
+    result = await tool.execute(query="nanobot", count=2)
+    assert result == "custom:nanobot:2"
