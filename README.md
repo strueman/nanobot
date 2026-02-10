@@ -20,7 +20,7 @@
 
 ## 📢 News
 
-- **2026-02-10** 🎉 Released v0.1.3.post6 with improvements! Check the updates [notes](https://github.com/HKUDS/nanobot/releases/tag/v0.1.3.post6) and our [roadmap](https://github.com/HKUDS/nanobot/discussions/431).
+- **2026-02-10** 🎉 Released v0.1.3.post6 with multiple improvements! Check the [notes](https://github.com/HKUDS/nanobot/releases/tag/v0.1.3.post6) and our [roadmap](https://github.com/HKUDS/nanobot/discussions/431).
 - **2026-02-09** 💬 Added Slack, Email, and QQ support — nanobot now supports multiple chat platforms!
 - **2026-02-08** 🔧 Refactored Providers—adding a new LLM provider now takes just 2 simple steps! Check [here](#providers).
 - **2026-02-07** 🚀 Released v0.1.3.post5 with Qwen support & several key improvements! Check [here](https://github.com/HKUDS/nanobot/releases/tag/v0.1.3.post5) for details.
@@ -95,7 +95,7 @@ pip install nanobot-ai
 
 > [!TIP]
 > Set your API key in `~/.nanobot/config.json`.
-> Get API keys: [OpenRouter](https://openrouter.ai/keys) (Global) · [Brave Search](https://brave.com/search/api/) (optional, for web search)
+> Get API keys: [OpenRouter](https://openrouter.ai/keys) (Global) · [DashScope](https://dashscope.console.aliyun.com) (Qwen) · [Brave Search](https://brave.com/search/api/) or [Tavily](https://tavily.com/) (optional, for web search). SearXNG is supported via a base URL.
 
 **1. Initialize**
 
@@ -116,6 +116,78 @@ For OpenRouter - recommended for global users:
   "agents": {
     "defaults": {
       "model": "anthropic/claude-opus-4-5"
+    }
+  }
+}
+```
+
+**Optional: Web search provider** (default is `brave`)
+
+Config keys:
+- `tools.web.search.provider`: `brave` (default), `duckduckgo`, `tavily`, or `searxng`
+- `tools.web.search.apiKey` (or `BRAVE_API_KEY`)
+- `tools.web.search.tavilyApiKey` (or `TAVILY_API_KEY`)
+- `tools.web.search.searxngBaseUrl` (or `SEARXNG_BASE_URL`)
+- `searxngBaseUrl` should be the server base URL (nanobot appends `/search`)
+- `tools.web.search.fallbackToDuckduckgoOnMissingKey` (default: `true`)
+
+Use DuckDuckGo (no API key required):
+
+```json
+{
+  "tools": {
+    "web": {
+      "search": {
+        "provider": "duckduckgo",
+        "maxResults": 5
+      }
+    }
+  }
+}
+```
+
+Use Tavily:
+
+```json
+{
+  "tools": {
+    "web": {
+      "search": {
+        "provider": "tavily",
+        "tavilyApiKey": "tvly-...",
+        "maxResults": 5
+      }
+    }
+  }
+}
+```
+
+Use SearXNG:
+
+```json
+{
+  "tools": {
+    "web": {
+      "search": {
+        "provider": "searxng",
+        "searxngBaseUrl": "https://searx.example",
+        "maxResults": 5
+      }
+    }
+  }
+}
+```
+
+Disable automatic DuckDuckGo fallback on missing keys:
+
+```json
+{
+  "tools": {
+    "web": {
+      "search": {
+        "provider": "brave",
+        "fallbackToDuckduckgoOnMissingKey": false
+      }
     }
   }
 }
